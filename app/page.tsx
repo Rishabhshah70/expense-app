@@ -672,6 +672,7 @@ export default function Home() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [lastSeenEmail, setLastSeenEmail] = useState("");
   const [entryType, setEntryType] = useState<EntryType>("expense");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
@@ -741,11 +742,14 @@ export default function Home() {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
         setCurrentUser(null);
+        setLastSeenEmail("");
         setExpenses([]);
         setIsLoading(false);
         setAuthReady(true);
         return;
       }
+
+      setLastSeenEmail(user.email ?? "");
 
       if (!ALLOWED_EMAILS.length) {
         setCurrentUser(null);
@@ -1093,6 +1097,20 @@ export default function Home() {
               }}
             >
               {authError}
+            </div>
+          )}
+          {!authError && lastSeenEmail && (
+            <div
+              style={{
+                marginBottom: 16,
+                padding: "12px 14px",
+                background: "#fff7ed",
+                color: "#9a3412",
+                border: "1px solid #fdba74",
+                borderRadius: 12,
+              }}
+            >
+              Signed in as {lastSeenEmail}, but access is still being checked.
             </div>
           )}
           <button
