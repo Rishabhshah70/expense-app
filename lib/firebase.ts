@@ -1,4 +1,5 @@
-import { initializeApp } from "firebase/app";
+import { getApp, getApps, initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const requiredEnvVars = {
@@ -29,5 +30,6 @@ const firebaseConfig = {
   appId: requiredEnvVars.appId,
 };
 
-const app = initializeApp(firebaseConfig);
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+export const auth = getAuth(app);
 export const db = getFirestore(app);

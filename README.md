@@ -26,6 +26,15 @@ NEXT_PUBLIC_FIREBASE_PROJECT_ID=
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 NEXT_PUBLIC_FIREBASE_APP_ID=
+NEXT_PUBLIC_ALLOWED_EMAILS=
+```
+
+`NEXT_PUBLIC_ALLOWED_EMAILS` should be a comma-separated list of the Google email addresses that are allowed to use the app.
+
+Example:
+
+```bash
+NEXT_PUBLIC_ALLOWED_EMAILS=you@example.com,tejal@example.com
 ```
 
 ## Deployment
@@ -38,5 +47,11 @@ The simplest deployment path is Vercel:
 4. Deploy
 
 After deployment, both users can access the same shared app from desktop or mobile.
+
+For Google sign-in to work:
+
+1. In the Firebase console, enable Google as a sign-in provider.
+2. In Firebase Authentication settings, make sure your Vercel domain is listed as an authorized domain.
+3. Update `NEXT_PUBLIC_ALLOWED_EMAILS` in Vercel with the exact email addresses you want to allow.
 
 Do not commit real secrets or service-account JSON files into the repo.
