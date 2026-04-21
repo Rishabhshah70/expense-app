@@ -77,20 +77,27 @@ const OPENING_BALANCE_BEFORE_2026 = -61790;
 const INITIAL_CASH_POOL_BALANCE = 15000;
 
 const containerStyle = {
-  padding: 24,
+  padding: "clamp(16px, 4vw, 24px)",
   maxWidth: 1400,
   margin: "0 auto",
+  width: "100%",
+  boxSizing: "border-box" as const,
   fontFamily: "system-ui, sans-serif",
   color: "#111827",
 };
 
 const inputStyle = {
   width: "100%",
+  boxSizing: "border-box" as const,
+  minHeight: 52,
   padding: "12px 14px",
   borderRadius: 10,
   border: "1px solid #d1d5db",
-  fontSize: 14,
+  fontSize: 16,
+  color: "#111827",
   background: "#fff",
+  appearance: "none" as const,
+  WebkitAppearance: "none" as const,
 };
 
 const labelStyle = {
@@ -1029,14 +1036,20 @@ export default function Home() {
         </p>
       </div>
 
-      <div style={{ display: "flex", gap: 10, margin: "20px 0", flexWrap: "wrap" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+          gap: 10,
+          margin: "20px 0",
+        }}
+      >
         {(["add", "monthly", "list"] as Tab[]).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             style={{
-              flex: 1,
-              minWidth: 140,
+              width: "100%",
               padding: "12px 14px",
               background: activeTab === tab ? "#111827" : "#ffffff",
               color: activeTab === tab ? "#ffffff" : "#111827",
