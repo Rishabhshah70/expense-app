@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { auth, db } from "../lib/firebase";
+import { db } from "../lib/firebase";
 import {
   addDoc,
   collection,
@@ -10,14 +10,6 @@ import {
   getDocs,
   updateDoc,
 } from "firebase/firestore";
-import {
-  GoogleAuthProvider,
-  User,
-  getRedirectResult,
-  onAuthStateChanged,
-  signInWithRedirect,
-  signOut,
-} from "firebase/auth";
 import {
   Bar,
   BarChart,
@@ -83,10 +75,6 @@ const CHART_COLORS = [
 // Negative means Rishabh owes Tejal before Jan 2026.
 const OPENING_BALANCE_BEFORE_2026 = -61790;
 const INITIAL_CASH_POOL_BALANCE = 15000;
-const ALLOWED_EMAILS = (process.env.NEXT_PUBLIC_ALLOWED_EMAILS ?? "")
-  .split(",")
-  .map((email) => email.trim().toLowerCase())
-  .filter(Boolean);
 
 const containerStyle = {
   padding: "clamp(16px, 4vw, 24px)",
@@ -123,13 +111,6 @@ const cardStyle = {
   background: "#fff",
   padding: 18,
   boxShadow: "0 8px 24px rgba(15, 23, 42, 0.05)",
-};
-
-const authCardStyle = {
-  ...cardStyle,
-  maxWidth: 520,
-  margin: "48px auto",
-  padding: 24,
 };
 
 const tableHeaderStyle = {
@@ -208,10 +189,6 @@ function formatNumber(value: number) {
 function formatTooltipValue(value: unknown) {
   const normalizedValue = Array.isArray(value) ? value[0] : value;
   return formatCurrency(Number(normalizedValue ?? 0));
-}
-
-function isAllowedEmail(email: string | null | undefined) {
-  return !!email && ALLOWED_EMAILS.includes(email.toLowerCase());
 }
 
 function isSameMonth(date: Date, reference: Date) {
@@ -669,10 +646,6 @@ function MonthlyComparisonChart({
 }
 
 export default function Home() {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [authReady, setAuthReady] = useState(false);
-  const [authError, setAuthError] = useState("");
-  const [lastSeenEmail, setLastSeenEmail] = useState("");
   const [entryType, setEntryType] = useState<EntryType>("expense");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
@@ -731,70 +704,8 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: "select_account" });
-    auth.languageCode = "en";
-
-    getRedirectResult(auth).catch(() => {
-      setAuthError("Could not complete sign-in. Please try again.");
-    });
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        setCurrentUser(null);
-        setLastSeenEmail("");
-        setExpenses([]);
-        setIsLoading(false);
-        setAuthReady(true);
-        return;
-      }
-
-      setLastSeenEmail(user.email ?? "");
-
-      if (!ALLOWED_EMAILS.length) {
-        setCurrentUser(null);
-        setAuthError(
-          "Allowed emails are not configured yet. Add NEXT_PUBLIC_ALLOWED_EMAILS in Vercel and locally."
-        );
-        await signOut(auth);
-        setAuthReady(true);
-        return;
-      }
-
-      if (!isAllowedEmail(user.email)) {
-        setCurrentUser(null);
-        setAuthError("This Google account is not allowed to use this app.");
-        await signOut(auth);
-        setAuthReady(true);
-        return;
-      }
-
-      setAuthError("");
-      setCurrentUser(user);
-      setAuthReady(true);
-      fetchExpenses();
-    });
-
-    return () => unsubscribe();
+    fetchExpenses();
   }, []);
-
-  const handleGoogleSignIn = async () => {
-    const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: "select_account" });
-    setAuthError("");
-    try {
-      await signInWithRedirect(auth, provider);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Google sign-in could not be started.";
-      setAuthError(message);
-    }
-  };
-
-  const handleSignOut = async () => {
-    await signOut(auth);
-    setCurrentUser(null);
-  };
 
   const calculateSplit = () => {
     const amt = Number(amount);
@@ -1047,94 +958,6 @@ export default function Home() {
     (openingBalanceBefore2026 + trackedDataSettlementImpact).toFixed(2)
   );
 
-  if (!authReady) {
-    return (
-      <div style={containerStyle}>
-        <div style={authCardStyle}>
-          <h1 style={{ marginTop: 0, fontSize: 30 }}>Checking access...</h1>
-          <p style={{ marginBottom: 0, color: "#4b5563" }}>
-            We&apos;re verifying your sign-in before loading the expense tracker.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!currentUser) {
-    return (
-      <div style={containerStyle}>
-        <div style={authCardStyle}>
-          <div
-            style={{
-              display: "inline-block",
-              marginBottom: 12,
-              padding: "6px 10px",
-              borderRadius: 999,
-              background: "#eef2ff",
-              color: "#3730a3",
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-            }}
-          >
-            Private Access
-          </div>
-          <h1 style={{ marginTop: 0, fontSize: 30 }}>Sign in to continue</h1>
-          <p style={{ color: "#4b5563", lineHeight: 1.6 }}>
-            This expense tracker is limited to approved Google accounts only. Sign in with your
-            Google account to continue on web or phone.
-          </p>
-          {authError && (
-            <div
-              style={{
-                marginBottom: 16,
-                padding: "12px 14px",
-                background: "#fef2f2",
-                color: "#b91c1c",
-                border: "1px solid #fecaca",
-                borderRadius: 12,
-              }}
-            >
-              {authError}
-            </div>
-          )}
-          {!authError && lastSeenEmail && (
-            <div
-              style={{
-                marginBottom: 16,
-                padding: "12px 14px",
-                background: "#fff7ed",
-                color: "#9a3412",
-                border: "1px solid #fdba74",
-                borderRadius: 12,
-              }}
-            >
-              Signed in as {lastSeenEmail}, but access is still being checked.
-            </div>
-          )}
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            style={{
-              width: "100%",
-              padding: "14px 16px",
-              border: "none",
-              borderRadius: 12,
-              background: "#111827",
-              color: "#ffffff",
-              fontWeight: 700,
-              cursor: "pointer",
-              fontSize: 16,
-            }}
-          >
-            Continue with Google
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div style={containerStyle}>
       <div
@@ -1149,35 +972,6 @@ export default function Home() {
         <p style={{ margin: "8px 0 0", color: "#4b5563" }}>
           Add, split, filter, and review shared expenses in one place.
         </p>
-        <div
-          style={{
-            marginTop: 14,
-            display: "flex",
-            justifyContent: "space-between",
-            gap: 12,
-            alignItems: "center",
-            flexWrap: "wrap",
-          }}
-        >
-          <div style={{ color: "#4b5563", fontSize: 14 }}>
-            Signed in as <strong>{currentUser.email}</strong>
-          </div>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            style={{
-              padding: "10px 14px",
-              borderRadius: 10,
-              border: "1px solid #d1d5db",
-              background: "#ffffff",
-              color: "#111827",
-              cursor: "pointer",
-              fontWeight: 600,
-            }}
-          >
-            Sign out
-          </button>
-        </div>
       </div>
 
       <div
