@@ -191,6 +191,13 @@ function formatTooltipValue(value: unknown) {
   return formatCurrency(Number(normalizedValue ?? 0));
 }
 
+function formatCompactCurrency(value: number) {
+  return `₹${new Intl.NumberFormat("en-IN", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(value)}`;
+}
+
 function isSameMonth(date: Date, reference: Date) {
   return (
     date.getMonth() === reference.getMonth() &&
@@ -526,10 +533,14 @@ function ShareBreakdown({
 function ChartsSection({
   title,
   categoryData,
+  isMobile,
 }: {
   title: string;
   categoryData: { name: string; value: number }[];
+  isMobile: boolean;
 }) {
+  const mobileChartHeight = Math.max(320, categoryData.length * 44);
+
   return (
     <div
       style={{
@@ -578,21 +589,49 @@ function ChartsSection({
         {categoryData.length === 0 ? (
           <p style={{ color: "#6b7280" }}>No expense data available for this view.</p>
         ) : (
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={isMobile ? mobileChartHeight : 300}>
             <BarChart
+              layout={isMobile ? "vertical" : "horizontal"}
               data={categoryData}
-              margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
+              margin={
+                isMobile
+                  ? { top: 10, right: 12, left: 8, bottom: 0 }
+                  : { top: 10, right: 10, left: 12, bottom: 24 }
+              }
             >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis
-                dataKey="name"
-                angle={-20}
-                textAnchor="end"
-                interval={0}
-                height={60}
-                tick={{ fontSize: 12 }}
-              />
-              <YAxis tickFormatter={(value) => `₹${formatNumber(Number(value))}`} width={90} />
+              {isMobile ? (
+                <>
+                  <XAxis
+                    type="number"
+                    tickFormatter={(value) => formatCompactCurrency(Number(value))}
+                    tick={{ fontSize: 11 }}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    width={104}
+                    tick={{ fontSize: 12 }}
+                    interval={0}
+                  />
+                </>
+              ) : (
+                <>
+                  <XAxis
+                    dataKey="name"
+                    angle={-20}
+                    textAnchor="end"
+                    interval={0}
+                    height={60}
+                    tick={{ fontSize: 12 }}
+                  />
+                  <YAxis
+                    tickFormatter={(value) => formatCompactCurrency(Number(value))}
+                    width={100}
+                    tick={{ fontSize: 12 }}
+                  />
+                </>
+              )}
               <Tooltip formatter={formatTooltipValue} />
               <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                 {categoryData.map((entry, index) => (
@@ -612,27 +651,62 @@ function ChartsSection({
 
 function MonthlyComparisonChart({
   data,
+  isMobile,
 }: {
   data: { monthKey: string; label: string; value: number }[];
+  isMobile: boolean;
 }) {
+  const mobileChartHeight = Math.max(280, data.length * 52);
+
   return (
     <div style={{ ...cardStyle, minHeight: 380 }}>
       <h3 style={{ marginTop: 0 }}>Monthly Expense Comparison</h3>
       {data.length === 0 ? (
         <p style={{ color: "#6b7280" }}>No expense data available for monthly comparison.</p>
       ) : (
-        <ResponsiveContainer width="100%" height={320}>
-          <BarChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
+        <ResponsiveContainer width="100%" height={isMobile ? mobileChartHeight : 320}>
+          <BarChart
+            data={data}
+            layout={isMobile ? "vertical" : "horizontal"}
+            margin={
+              isMobile
+                ? { top: 10, right: 12, left: 8, bottom: 0 }
+                : { top: 10, right: 10, left: 12, bottom: 24 }
+            }
+          >
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis
-              dataKey="label"
-              interval={0}
-              angle={-20}
-              textAnchor="end"
-              height={60}
-              tick={{ fontSize: 12 }}
-            />
-            <YAxis tickFormatter={(value) => `₹${formatNumber(Number(value))}`} width={90} />
+            {isMobile ? (
+              <>
+                <XAxis
+                  type="number"
+                  tickFormatter={(value) => formatCompactCurrency(Number(value))}
+                  tick={{ fontSize: 11 }}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="label"
+                  width={70}
+                  tick={{ fontSize: 12 }}
+                  interval={0}
+                />
+              </>
+            ) : (
+              <>
+                <XAxis
+                  dataKey="label"
+                  interval={0}
+                  angle={-20}
+                  textAnchor="end"
+                  height={60}
+                  tick={{ fontSize: 12 }}
+                />
+                <YAxis
+                  tickFormatter={(value) => formatCompactCurrency(Number(value))}
+                  width={100}
+                  tick={{ fontSize: 12 }}
+                />
+              </>
+            )}
             <Tooltip
               formatter={formatTooltipValue}
               labelFormatter={(label) => `Month: ${label}`}
@@ -669,6 +743,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
 
   const resetForm = () => {
     setEntryType("expense");
@@ -705,6 +780,15 @@ export default function Home() {
 
   useEffect(() => {
     fetchExpenses();
+  }, []);
+
+  useEffect(() => {
+    const updateViewport = () => setIsMobile(window.innerWidth < 640);
+
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+
+    return () => window.removeEventListener("resize", updateViewport);
   }, []);
 
   const calculateSplit = () => {
@@ -1386,7 +1470,11 @@ export default function Home() {
             )}
           />
 
-          <ChartsSection title="This Month" categoryData={currentMonthCategoryData} />
+          <ChartsSection
+            title="This Month"
+            categoryData={currentMonthCategoryData}
+            isMobile={isMobile}
+          />
         </div>
       )}
 
@@ -1565,9 +1653,13 @@ export default function Home() {
             )}
           />
 
-          <ChartsSection title="Filtered Spend" categoryData={filteredCategoryData} />
+          <ChartsSection
+            title="Filtered Spend"
+            categoryData={filteredCategoryData}
+            isMobile={isMobile}
+          />
 
-          <MonthlyComparisonChart data={monthlyComparisonData} />
+          <MonthlyComparisonChart data={monthlyComparisonData} isMobile={isMobile} />
 
           <div style={{ ...cardStyle, padding: 0, overflow: "hidden" }}>
             {isLoading ? (
