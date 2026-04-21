@@ -778,7 +778,13 @@ export default function Home() {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
     setAuthError("");
-    await signInWithRedirect(auth, provider);
+    try {
+      await signInWithRedirect(auth, provider);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Google sign-in could not be started.";
+      setAuthError(message);
+    }
   };
 
   const handleSignOut = async () => {
