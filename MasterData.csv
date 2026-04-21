@@ -1,0 +1,154 @@
+date,amount,category,paidBy,rishabhShare,tejalShare,description
+2026-04-20,55000,Rent,Rishabh,27500,27500,Rent
+2026-04-01,2650,Utilities,Tejal,0,2650,Shanti 
+2026-04-01,2650,Utilities,Rishabh,2650,0,Shanti 
+2026-04-01,2750,Utilities,Tejal,0,2750,Nanda
+2026-04-01,2750,Utilities,Rishabh,2750,0,Nanda
+2026-04-01,200,Utilities,Rishabh,100,100,Netflix
+2026-04-01,74.75,Utilities,Rishabh,74.75,0,Youtube
+2026-04-01,74.75,Utilities,Tejal,0,74.75,Youtube
+2026-04-01,278.5,Utilities,Rishabh,278.5,0,apple
+2026-04-01,278.5,Utilities,Tejal,0,278.5,apple
+2026-04-01,400,Utilities,Rishabh,400,0,Airtel
+2026-04-01,1100,Utilities,Rishabh,550,550,Airtel
+2026-04-01,600,Utilities,Rishabh,300,300,Car wash
+2026-04-02,1270,Groceries,Rishabh,635,635,Swiggy
+2026-04-02,2341,Shopping,Rishabh,1170.5,1170.5,Amazon
+2026-04-06,270,Medical Expenses,Tejal,135,135,Jupiter 
+2026-04-09,750,Other,Tejal,375,375,Chaddar
+2026-04-14,7520,Dining,Tejal,3760,3760,Swiggy
+2026-04-14,13221,Shopping,Tejal,6610.5,6610.5,Amazon
+2026-04-01,213,Shopping,Tejal,0,213,Myntra
+2026-04-08,1460,Other,Tejal,1460,0,IRCTC
+2026-03-20,55000,Rent,Rishabh,27500,27500,Rent
+2026-03-01,4500,Utilities,Tejal,2250,2250,Bai
+2026-03-01,5500,Utilities,Rishabh,2750,2750,Bai
+2026-03-01,200,Utilities,Rishabh,100,100,Netflix
+2026-03-01,74.75,Utilities,Rishabh,74.75,0,Youtube
+2026-03-01,74.75,Utilities,Tejal,0,74.75,Youtube
+2026-03-01,278.5,Utilities,Rishabh,278.5,0,apple
+2026-03-01,278.5,Utilities,Tejal,0,278.5,apple
+2026-03-01,400,Utilities,Rishabh,400,0,Airtel
+2026-03-01,1100,Utilities,Rishabh,550,550,Airtel
+2026-03-01,600,Utilities,Rishabh,300,300,Car wash
+2026-03-28,2524,Dining,Tejal,1262,1262,Swiggy
+2026-03-01,100,Utilities,Rishabh,50,50,Snabbit
+2026-03-01,240,Groceries,Rishabh,120,120,Convenio
+2026-03-01,1107,Groceries,Rishabh,553.5,553.5,Swiggy
+2026-03-02,237,Utilities,Rishabh,118.5,118.5,Urban Company
+2026-03-05,200,Dining,Rishabh,100,100,Food
+2026-03-09,373,Medical Expenses,Rishabh,186.5,186.5,Jupiter Parking +satyam
+2026-03-10,80,Home supplies,Rishabh,40,40,Stationery
+2026-03-10,2250,Other,Rishabh,2250,0,Kajal Recharge
+2026-03-11,1670,Utilities,Rishabh,835,835,Electricity Vyan
+2026-03-11,470,Transit,Rishabh,470,0,Petrol
+2026-03-11,2018,Utilities,Rishabh,1009,1009,Urban Company
+2026-03-12,409,Dining,Rishabh,204.5,204.5,Food
+2026-03-15,260,Utilities,Rishabh,130,130,Snabbit
+2026-03-17,915,Transit,Rishabh,915,0,Petrol
+2026-03-19,651,Dining,Rishabh,325.5,325.5,Food
+2026-03-20,2400,Other,Rishabh,2400,0,Bike
+2026-03-21,3446,Dining,Rishabh,1723,1723,Food
+2026-03-22,600,Shopping,Rishabh,300,300,Clothes
+2026-03-01,7378,Groceries,Rishabh,3689,3689,Swiggy
+2026-03-22,16959,Shopping,Rishabh,8479.5,8479.5,Amazon
+2026-03-08,4017,Dining,Rishabh,2008.5,2008.5,Nutcracker
+2026-03-03,1067,Medical Expenses,Tejal,533.5,533.5,Jupiter + Satyam
+2026-03-10,1248,Groceries,Tejal,624,624,Swiggy
+2026-03-07,10898,Shopping,Tejal,5449,5449,Amazon
+2026-03-18,1822,Shopping,Tejal,0,1822,Myntra
+2026-02-01,37625,Rent,Tejal,18812.5,18812.5,Rent
+2026-02-01,4500,Utilities,Tejal,2250,2250,Bai
+2026-02-01,2380,Utilities,Rishabh,1190,1190,Bai
+2026-02-01,200,Utilities,Rishabh,100,100,Netflix
+2026-02-01,74.75,Utilities,Rishabh,74.75,0,Youtube
+2026-02-01,74.75,Utilities,Tejal,0,74.75,Youtube
+2026-02-01,278.5,Utilities,Rishabh,278.5,0,apple
+2026-02-01,278.5,Utilities,Tejal,0,278.5,apple
+2026-02-01,400,Utilities,Rishabh,400,0,Airtel
+2026-02-01,1100,Utilities,Rishabh,550,550,Airtel
+2026-02-20,55000,Rent,Rishabh,27500,27500,Rent 1804
+2026-02-01,600,Utilities,Rishabh,300,300,Car wash
+2026-02-04,11800,Other,Rishabh,5900,5900,Cluster 1
+2026-02-05,459.85,Transit,Rishabh,459.85,0,Petrol
+2026-02-06,130,Spa & Parlour,Rishabh,130,0,Haircut
+2026-02-06,660,Dining,Rishabh,330,330,Food
+2026-02-12,17000,Other,Rishabh,8500,8500,Photogrphaer first installment
+2026-02-12,500,Transit,Rishabh,250,250,Petrol
+2026-02-13,34,Medical Expenses,Rishabh,17,17,Jupiter
+2026-02-17,120,Utilities,Rishabh,60,60,Istri
+2026-02-18,10000,Medical Expenses,Rishabh,5000,5000,Jupiter birthing suite booking
+2026-02-19,18952,Other,Rishabh,9476,9476,Moving expenses
+2026-02-22,370,Dining,Rishabh,185,185,Food
+2026-02-26,54,Utilities,Rishabh,27,27,Mahanagar Gas
+2026-02-21,10000,Loan,Tejal,10000,0,Teju to Rish
+2026-02-13,10695,Shopping,Rishabh,5347.5,5347.5,Amazon
+2026-02-20,7644,Dining,Rishabh,3822,3822,Swiggy from 20 feb to 28 feb
+2026-02-23,1880,Utilities,Rishabh,940,940,Vyan Electricity
+2026-02-02,13076,Shopping,Tejal,6538,6538,Amazon
+2026-02-02,1668,Medical Expenses,Tejal,834,834,Jupiter
+2026-02-09,14584,Dining,Tejal,7292,7292,Swiggy
+2026-02-27,850,Shopping,Tejal,0,850,Myntra
+2026-02-07,2400,Shopping,Tejal,0,2400,Saree
+2026-02-21,10000,Loan,Tejal,10000,0,Paid to Rish
+2026-02-25,2800,Shopping,Tejal,1400,1400,Mr DIY
+2026-02-26,70,Spa & Parlour,Tejal,0,70,rizu
+2026-02-19,1000,Other,Tejal,0,1000,Tax Anthony
+2026-02-02,142000,Home supplies,Tejal,71000,71000,Ikea for new home
+2026-01-01,45150,Rent,Rishabh,22575,22575,Rent
+2026-01-01,4500,Utilities,Tejal,2250,2250,Bai
+2026-01-01,2500,Utilities,Rishabh,1250,1250,Bai
+2026-01-01,200,Utilities,Rishabh,100,100,Netflix
+2026-01-01,74.75,Utilities,Rishabh,74.75,0,Youtube
+2026-01-01,74.75,Utilities,Tejal,0,74.75,Youtube
+2026-01-01,278.5,Utilities,Rishabh,278.5,0,apple
+2026-01-01,278.5,Utilities,Tejal,0,278.5,apple
+2026-01-01,400,Utilities,Rishabh,400,0,Airtel
+2026-01-01,1100,Utilities,Rishabh,550,550,Airtel
+2026-01-01,600,Utilities,Rishabh,300,300,Car wash
+2026-01-01,969,Transit,Tejal,484.5,484.5,Ola
+2026-01-01,1642,Dining,Tejal,821,821,Swiggy
+2026-01-01,6001,Shopping,Tejal,3000.5,3000.5,Amazon
+2026-01-05,1000,Medical Expenses,Tejal,500,500,Jupiter
+2026-01-01,25000,Shopping,Tejal,0,25000,Chennai shopping
+2026-01-06,181623,Loan,Tejal,181623,0,Settled from last year - see sheet Aug 24
+2026-01-08,450,Dining,Tejal,225,225,Icecream
+2026-01-09,500,Groceries,Tejal,250,250,Zepto
+2026-01-09,5000,Loan,Tejal,5000,0,Teju gave Rish
+2026-01-09,462,Dining,Rishabh,231,231,Zepto
+2026-01-11,786,Dining,Rishabh,393,393,KFC
+2026-01-11,600,Car,Rishabh,300,300,Washing
+2026-01-11,830,Dining,Rishabh,415,415,BLue TOkai
+2026-01-09,70,Shopping,Rishabh,0,70,Alteration
+2026-01-09,1100,Shopping,Rishabh,1100,0,Rish Office treat
+2026-01-08,350,Transit,Rishabh,350,0,Petrol
+2026-01-07,250,Dining,Rishabh,125,125,Santosham
+2026-01-10,2160,Shopping,Rishabh,2160,0,Perfume
+2026-01-11,650,Dining,Rishabh,325,325,Dadar food
+2026-01-11,4050,Car,Tejal,2025,2025,Petrol
+2026-01-11,1800,Utilities,Rishabh,900,900,Electricity
+2026-01-10,1303,Shopping,Rishabh,651.5,651.5,Amazon
+2026-01-10,1803,Shopping,Rishabh,901.5,901.5,Amazon
+2026-01-02,468,Shopping,Rishabh,234,234,Amazon
+2026-01-01,1414,Dining,Rishabh,707,707,Swiggy
+2026-01-14,4453,Shopping,Tejal,4453,0,Amazon
+2026-01-17,4000,Other,Tejal,2000,2000,Rental agreement
+2026-01-15,5000,Loan,Rishabh,5000,0,Teju gave Rish
+2026-01-15,2500,Medical Expenses,Rishabh,1250,1250,Teju test
+2026-01-13,1666,Groceries,Rishabh,833,833,Reshma food
+2026-01-14,5994,Home supplies,Rishabh,2997,2997,Urban Company house cleaning
+2026-01-14,150,Other,Rishabh,0,150,Alteration
+2026-01-19,350,Transit,Rishabh,350,0,Petrol
+2026-01-18,123000,Loan,Tejal,123000,0,Teju gave Rish
+2026-01-21,442,Transit,Rishabh,442,0,TO and fro office
+2026-01-22,1499,Utilities,Rishabh,749.5,749.5,Jiohotstar
+2026-01-19,1189,Transit,Rishabh,1189,0,Petrol
+2026-01-26,240,Utilities,Rishabh,120,120,Istri
+2026-01-27,464,Dining,Rishabh,232,232,Blinkit
+2026-01-28,100,Other,Rishabh,50,50,Porter booking
+2026-01-18,165000,Other,Rishabh,82500,82500,1804 Deposit
+2026-01-13,3944,Dining,Rishabh,1972,1972,Swiggy from Jan 13 to Jan 31
+2026-01-13,1717,Shopping,Rishabh,858.5,858.5,Amazon from 13 to 31 Jan
+2026-01-21,36369,Travel,Rishabh,18184.5,18184.5,Taj the trees
+2026-01-23,2289,Medical Expenses,Rishabh,1144.5,1144.5,1 mg
+2026-01-31,2386,Shopping,Tejal,1193,1193,Amazon
