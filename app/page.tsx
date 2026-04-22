@@ -13,10 +13,12 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import {
+  browserLocalPersistence,
   GoogleAuthProvider,
   User,
   getRedirectResult,
   onAuthStateChanged,
+  setPersistence,
   signInWithRedirect,
   signOut,
 } from "firebase/auth";
@@ -869,7 +871,8 @@ export default function Home() {
     provider.setCustomParameters({ prompt: "select_account" });
     auth.languageCode = "en";
 
-    getRedirectResult(auth)
+    setPersistence(auth, browserLocalPersistence)
+      .then(() => getRedirectResult(auth))
       .then((result) => {
         if (!result?.user && typeof window !== "undefined") {
           const attemptedSignIn = window.sessionStorage.getItem(AUTH_ATTEMPT_KEY);
@@ -957,6 +960,7 @@ export default function Home() {
       if (typeof window !== "undefined") {
         window.sessionStorage.setItem(AUTH_ATTEMPT_KEY, "1");
       }
+      await setPersistence(auth, browserLocalPersistence);
       await signInWithRedirect(auth, provider);
     } catch (error) {
       const message =
