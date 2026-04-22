@@ -598,19 +598,19 @@ function ChartsSection({
               />
               <text
                 x="50%"
-                y="46%"
+                y="47%"
                 textAnchor="middle"
                 dominantBaseline="middle"
-                style={{ fontSize: 13, fill: "#6b7280", fontWeight: 600 }}
+                style={{ fontSize: isMobile ? 11 : 12, fill: "#6b7280", fontWeight: 600 }}
               >
                 Total Spend
               </text>
               <text
                 x="50%"
-                y="55%"
+                y="56%"
                 textAnchor="middle"
                 dominantBaseline="middle"
-                style={{ fontSize: isMobile ? 16 : 18, fill: "#111827", fontWeight: 800 }}
+                style={{ fontSize: isMobile ? 11 : 12, fill: "#111827", fontWeight: 800 }}
               >
                 {formatCurrency(totalAmount)}
               </text>
