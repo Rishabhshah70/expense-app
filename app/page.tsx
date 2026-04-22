@@ -7,7 +7,9 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
+  setDoc,
   updateDoc,
 } from "firebase/firestore";
 import {
@@ -49,6 +51,7 @@ type ExpensePayload = Omit<Expense, "id">;
 
 const EXPENSE_CATEGORIES = [
   "Cash Expense",
+  "Cash",
   "Rent",
   "Utilities",
   "Groceries",
@@ -74,7 +77,8 @@ const CHART_COLORS = [
 
 // Negative means Rishabh owes Tejal before Jan 2026.
 const OPENING_BALANCE_BEFORE_2026 = -61790;
-const INITIAL_CASH_POOL_BALANCE = 15000;
+const DEFAULT_INITIAL_CASH_POOL_BALANCE = 15000;
+const SETTINGS_DOC_ID = "appConfig";
 
 const containerStyle = {
   padding: "clamp(16px, 4vw, 24px)",
@@ -191,6 +195,13 @@ function formatTooltipValue(value: unknown) {
   return formatCurrency(Number(normalizedValue ?? 0));
 }
 
+function formatPercentage(value: number) {
+  return `${new Intl.NumberFormat("en-IN", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(value)}%`;
+}
+
 function formatCompactCurrency(value: number) {
   return `₹${new Intl.NumberFormat("en-IN", {
     notation: "compact",
@@ -208,7 +219,11 @@ function isSameMonth(date: Date, reference: Date) {
 function buildCategoryData(expenses: Expense[]) {
   return EXPENSE_CATEGORIES.map((categoryName) => {
     const totalAmount = expenses
-      .filter((exp) => exp.category === categoryName)
+      .filter((exp) => {
+        const normalizedCategory =
+          (exp.entryType ?? "expense") === "cash" ? "Cash" : exp.category;
+        return normalizedCategory === categoryName;
+      })
       .reduce((sum, exp) => sum + exp.amount, 0);
 
     return {
@@ -322,8 +337,8 @@ function normalizeEntry(rawEntry: Expense): Expense {
     category:
       inferredEntryType === "loan"
         ? "Loan"
-        : inferredEntryType === "cash"
-        ? "Cash Top-up"
+      : inferredEntryType === "cash"
+        ? "Cash"
         : rawEntry.category,
   };
 }
@@ -540,6 +555,7 @@ function ChartsSection({
   isMobile: boolean;
 }) {
   const mobileChartHeight = Math.max(320, categoryData.length * 44);
+  const totalAmount = categoryData.reduce((sum, item) => sum + item.value, 0);
 
   return (
     <div
@@ -573,7 +589,31 @@ function ChartsSection({
                   />
                 ))}
               </Pie>
-              <Tooltip formatter={formatTooltipValue} />
+              <Tooltip
+                formatter={(value) => {
+                  const normalizedValue = Number(Array.isArray(value) ? value[0] : value ?? 0);
+                  const percentage = totalAmount > 0 ? (normalizedValue / totalAmount) * 100 : 0;
+                  return formatPercentage(percentage);
+                }}
+              />
+              <text
+                x="50%"
+                y="46%"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                style={{ fontSize: 13, fill: "#6b7280", fontWeight: 600 }}
+              >
+                Total Spend
+              </text>
+              <text
+                x="50%"
+                y="55%"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                style={{ fontSize: isMobile ? 16 : 18, fill: "#111827", fontWeight: 800 }}
+              >
+                {formatCurrency(totalAmount)}
+              </text>
               <Legend
                 verticalAlign="bottom"
                 wrapperStyle={{ paddingTop: 16 }}
@@ -606,6 +646,8 @@ function ChartsSection({
                     type="number"
                     tickFormatter={(value) => formatCompactCurrency(Number(value))}
                     tick={{ fontSize: 11 }}
+                    scale="sqrt"
+                    domain={[0, "auto"]}
                   />
                   <YAxis
                     type="category"
@@ -629,11 +671,13 @@ function ChartsSection({
                     tickFormatter={(value) => formatCompactCurrency(Number(value))}
                     width={100}
                     tick={{ fontSize: 12 }}
+                    scale="sqrt"
+                    domain={[0, "auto"]}
                   />
                 </>
               )}
               <Tooltip formatter={formatTooltipValue} />
-              <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+              <Bar dataKey="value" radius={[8, 8, 0, 0]} minPointSize={6}>
                 {categoryData.map((entry, index) => (
                   <Cell
                     key={entry.name}
@@ -742,8 +786,16 @@ export default function Home() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSavingCashPool, setIsSavingCashPool] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isMobile, setIsMobile] = useState(false);
+  const [initialCashPoolBalance, setInitialCashPoolBalance] = useState(
+    DEFAULT_INITIAL_CASH_POOL_BALANCE
+  );
+  const [isEditingCashPool, setIsEditingCashPool] = useState(false);
+  const [cashPoolInput, setCashPoolInput] = useState(
+    String(DEFAULT_INITIAL_CASH_POOL_BALANCE)
+  );
 
   const resetForm = () => {
     setEntryType("expense");
@@ -778,8 +830,28 @@ export default function Home() {
     }
   };
 
+  const fetchSettings = async () => {
+    try {
+      const settingsDoc = await getDoc(doc(db, "settings", SETTINGS_DOC_ID));
+      if (!settingsDoc.exists()) {
+        setInitialCashPoolBalance(DEFAULT_INITIAL_CASH_POOL_BALANCE);
+        setCashPoolInput(String(DEFAULT_INITIAL_CASH_POOL_BALANCE));
+        return;
+      }
+
+      const savedBalance = Number(settingsDoc.data().initialCashPoolBalance);
+      if (Number.isFinite(savedBalance)) {
+        setInitialCashPoolBalance(savedBalance);
+        setCashPoolInput(String(savedBalance));
+      }
+    } catch {
+      setErrorMessage("Could not load cash pool settings. Using the current default value.");
+    }
+  };
+
   useEffect(() => {
     fetchExpenses();
+    fetchSettings();
   }, []);
 
   useEffect(() => {
@@ -865,7 +937,7 @@ export default function Home() {
         entryType === "loan"
           ? "Loan"
           : entryType === "cash"
-          ? "Cash Top-up"
+          ? "Cash"
           : category,
       paidBy,
       date,
@@ -909,6 +981,33 @@ export default function Home() {
       await fetchExpenses();
     } catch {
       setErrorMessage("Could not delete the expense. Please try again.");
+    }
+  };
+
+  const handleCashPoolSave = async () => {
+    const nextValue = Number(cashPoolInput);
+
+    if (!Number.isFinite(nextValue) || nextValue < 0) {
+      setErrorMessage("Please enter a valid cash pool amount.");
+      return;
+    }
+
+    setIsSavingCashPool(true);
+    setErrorMessage("");
+
+    try {
+      await setDoc(
+        doc(db, "settings", SETTINGS_DOC_ID),
+        { initialCashPoolBalance: nextValue },
+        { merge: true }
+      );
+      setInitialCashPoolBalance(nextValue);
+      setCashPoolInput(String(nextValue));
+      setIsEditingCashPool(false);
+    } catch {
+      setErrorMessage("Could not update the cash pool. Please try again.");
+    } finally {
+      setIsSavingCashPool(false);
     }
   };
 
@@ -1013,8 +1112,12 @@ export default function Home() {
   const currentMonthSummary = buildSummary(currentMonthExpenses);
   const filteredCashSummary = buildSummary(filteredCashEntries);
   const currentMonthCashSummary = buildSummary(currentMonthCashEntries);
-  const filteredCategoryData = buildCategoryData(filteredExpensesOnly);
-  const currentMonthCategoryData = buildCategoryData(currentMonthExpenses);
+  const filteredCategoryData = buildCategoryData(
+    filteredEntries.filter((entry) => (entry.entryType ?? "expense") !== "loan")
+  );
+  const currentMonthCategoryData = buildCategoryData(
+    currentMonthEntries.filter((entry) => (entry.entryType ?? "expense") !== "loan")
+  );
   const currentMonthLabel = now.toLocaleDateString("en-IN", {
     month: "long",
     year: "numeric",
@@ -1022,17 +1125,20 @@ export default function Home() {
   const allExpenseEntries = expenses.filter(
     (entry) => (entry.entryType ?? "expense") === "expense"
   );
+  const allChartEntries = expenses.filter(
+    (entry) => (entry.entryType ?? "expense") !== "loan"
+  );
   const allCashEntries = expenses.filter(
     (entry) => (entry.entryType ?? "expense") === "cash"
   );
-  const monthlyComparisonData = buildMonthlyExpenseData(allExpenseEntries);
+  const monthlyComparisonData = buildMonthlyExpenseData(allChartEntries);
   const allTimeSummary = buildSummary(allExpenseEntries);
   const allTimeCashSummary = buildSummary(allCashEntries);
   const allTimeLoanImpact = getLoanSettlementImpact(expenses);
   const currentMonthLoanImpact = getLoanSettlementImpact(currentMonthEntries);
   const filteredLoanImpact = getLoanSettlementImpact(filteredEntries);
   const currentCashPoolBalance = Number(
-    (INITIAL_CASH_POOL_BALANCE + allCashEntries.reduce((sum, entry) => sum + entry.amount, 0)).toFixed(2)
+    (initialCashPoolBalance + allCashEntries.reduce((sum, entry) => sum + entry.amount, 0)).toFixed(2)
   );
   const trackedDataSettlementImpact = Number(
     (allTimeSummary.netBalance + allTimeCashSummary.netBalance + allTimeLoanImpact).toFixed(2)
@@ -1114,10 +1220,75 @@ export default function Home() {
         <div style={{ fontSize: 30, fontWeight: 800, marginTop: 6 }}>
           {formatCurrency(currentCashPoolBalance)}
         </div>
-        <p style={{ margin: "8px 0 0", color: "#4b5563" }}>
-          Based on starting cash pool of {formatCurrency(INITIAL_CASH_POOL_BALANCE)} plus all
-          tracked cash top-ups.
-        </p>
+        {isEditingCashPool ? (
+          <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={cashPoolInput}
+              onChange={(e) => setCashPoolInput(e.target.value)}
+              style={{ ...inputStyle, maxWidth: 240 }}
+            />
+            <button
+              type="button"
+              onClick={handleCashPoolSave}
+              disabled={isSavingCashPool}
+              style={{
+                padding: "10px 14px",
+                borderRadius: 10,
+                border: "none",
+                background: "#111827",
+                color: "#ffffff",
+                cursor: isSavingCashPool ? "not-allowed" : "pointer",
+                fontWeight: 700,
+                opacity: isSavingCashPool ? 0.7 : 1,
+              }}
+            >
+              {isSavingCashPool ? "Saving..." : "Save Cash Pool"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setCashPoolInput(String(initialCashPoolBalance));
+                setIsEditingCashPool(false);
+              }}
+              style={{
+                padding: "10px 14px",
+                borderRadius: 10,
+                border: "1px solid #d1d5db",
+                background: "#ffffff",
+                color: "#111827",
+                cursor: "pointer",
+                fontWeight: 600,
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+            <p style={{ margin: 0, color: "#4b5563" }}>
+              Based on starting cash pool of {formatCurrency(initialCashPoolBalance)} plus all
+              tracked cash additions.
+            </p>
+            <button
+              type="button"
+              onClick={() => setIsEditingCashPool(true)}
+              style={{
+                padding: "10px 14px",
+                borderRadius: 10,
+                border: "1px solid #d1d5db",
+                background: "#ffffff",
+                color: "#111827",
+                cursor: "pointer",
+                fontWeight: 600,
+              }}
+            >
+              Edit Cash Pool
+            </button>
+          </div>
+        )}
       </div>
 
       <div
@@ -1176,6 +1347,8 @@ export default function Home() {
             flexDirection: "column",
             gap: 14,
             maxWidth: 680,
+            margin: "0 auto",
+            width: "100%",
           }}
         >
           <div>
@@ -1192,7 +1365,7 @@ export default function Home() {
                   setRishabhShare("");
                   setTejalShare("");
                 } else if (nextType === "cash") {
-                  setCategory("");
+                  setCategory("Cash");
                   setBorrower("");
                   setSplitType("equal");
                   setRishabhShare("");
@@ -1203,9 +1376,9 @@ export default function Home() {
               }}
               style={{ ...inputStyle, cursor: "pointer" }}
             >
-              <option value="expense">Expense</option>
-              <option value="loan">Loan</option>
-              <option value="cash">Cash Top-up</option>
+                <option value="expense">Expense</option>
+                <option value="loan">Loan</option>
+                <option value="cash">Cash Added</option>
             </select>
           </div>
 
@@ -1245,7 +1418,7 @@ export default function Home() {
               {entryType === "loan"
                 ? "Loan Given By"
                 : entryType === "cash"
-                ? "Cash Top-up Added By"
+                ? "Cash Added By"
                 : "Who Paid"}
             </label>
             <select
@@ -1276,7 +1449,7 @@ export default function Home() {
             <>
               <div>
                 <label style={labelStyle}>
-                  {entryType === "cash" ? "How This Cash Top-up Is Shared" : "How to Split"}
+                  {entryType === "cash" ? "How This Cash Addition Is Shared" : "How to Split"}
                 </label>
                 <select
                   value={splitType}
