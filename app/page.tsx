@@ -87,6 +87,7 @@ const CHART_COLORS = [
 const OPENING_BALANCE_BEFORE_2026 = -61790;
 const DEFAULT_INITIAL_CASH_POOL_BALANCE = 15000;
 const SETTINGS_DOC_ID = "appConfig";
+const AUTH_ATTEMPT_KEY = "expense-app-auth-attempt";
 const ALLOWED_EMAILS = (process.env.NEXT_PUBLIC_ALLOWED_EMAILS ?? "")
   .split(",")
   .map((email) => email.trim().toLowerCase())
@@ -868,12 +869,36 @@ export default function Home() {
     provider.setCustomParameters({ prompt: "select_account" });
     auth.languageCode = "en";
 
-    getRedirectResult(auth).catch(() => {
-      setAuthError("Could not complete sign-in. Please try again.");
-    });
+    getRedirectResult(auth)
+      .then((result) => {
+        if (!result?.user && typeof window !== "undefined") {
+          const attemptedSignIn = window.sessionStorage.getItem(AUTH_ATTEMPT_KEY);
+          if (attemptedSignIn) {
+            setAuthError(
+              "Google sign-in returned to the app, but no authenticated session was created. Please try again."
+            );
+            window.sessionStorage.removeItem(AUTH_ATTEMPT_KEY);
+          }
+        }
+      })
+      .catch(() => {
+        setAuthError("Could not complete sign-in. Please try again.");
+        if (typeof window !== "undefined") {
+          window.sessionStorage.removeItem(AUTH_ATTEMPT_KEY);
+        }
+      });
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
+        if (typeof window !== "undefined") {
+          const attemptedSignIn = window.sessionStorage.getItem(AUTH_ATTEMPT_KEY);
+          if (attemptedSignIn && !authError) {
+            setAuthError(
+              "Google sign-in finished, but Firebase did not restore a user session. This usually means the auth callback completed without persisting the login."
+            );
+            window.sessionStorage.removeItem(AUTH_ATTEMPT_KEY);
+          }
+        }
         setCurrentUser(null);
         setLastSeenEmail("");
         setExpenses([]);
@@ -905,12 +930,15 @@ export default function Home() {
       setAuthError("");
       setCurrentUser(user);
       setAuthReady(true);
+      if (typeof window !== "undefined") {
+        window.sessionStorage.removeItem(AUTH_ATTEMPT_KEY);
+      }
       fetchExpenses();
       fetchSettings();
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [authError]);
 
   useEffect(() => {
     const updateViewport = () => setIsMobile(window.innerWidth < 640);
@@ -926,11 +954,17 @@ export default function Home() {
     provider.setCustomParameters({ prompt: "select_account" });
     setAuthError("");
     try {
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem(AUTH_ATTEMPT_KEY, "1");
+      }
       await signInWithRedirect(auth, provider);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Google sign-in could not be started.";
       setAuthError(message);
+      if (typeof window !== "undefined") {
+        window.sessionStorage.removeItem(AUTH_ATTEMPT_KEY);
+      }
     }
   };
 
