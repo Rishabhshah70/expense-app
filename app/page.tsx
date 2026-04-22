@@ -567,6 +567,11 @@ function ChartsSection({
     >
       <div style={{ ...cardStyle, minHeight: 360 }}>
         <h3 style={{ marginTop: 0 }}>{title} by Category</h3>
+        {categoryData.length > 0 && (
+          <p style={{ margin: "6px 0 14px", color: "#4b5563", fontWeight: 600 }}>
+            Total Spend: <span style={{ color: "#111827" }}>{formatCurrency(totalAmount)}</span>
+          </p>
+        )}
         {categoryData.length === 0 ? (
           <p style={{ color: "#6b7280" }}>No expense data available for this view.</p>
         ) : (
@@ -596,24 +601,6 @@ function ChartsSection({
                   return formatPercentage(percentage);
                 }}
               />
-              <text
-                x="50%"
-                y="47%"
-                textAnchor="middle"
-                dominantBaseline="middle"
-                style={{ fontSize: isMobile ? 11 : 12, fill: "#6b7280", fontWeight: 600 }}
-              >
-                Total Spend
-              </text>
-              <text
-                x="50%"
-                y="56%"
-                textAnchor="middle"
-                dominantBaseline="middle"
-                style={{ fontSize: isMobile ? 11 : 12, fill: "#111827", fontWeight: 800 }}
-              >
-                {formatCurrency(totalAmount)}
-              </text>
               <Legend
                 verticalAlign="bottom"
                 wrapperStyle={{ paddingTop: 16 }}
