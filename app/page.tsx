@@ -962,16 +962,36 @@ export default function Home() {
         window.sessionStorage.setItem(AUTH_ATTEMPT_KEY, "1");
       }
       await setPersistence(auth, browserLocalPersistence);
-      if (!isMobile) {
+      try {
         const result = await signInWithPopup(auth, provider);
         if (result.user) {
           if (typeof window !== "undefined") {
             window.sessionStorage.removeItem(AUTH_ATTEMPT_KEY);
           }
           setAuthError("");
+          return;
         }
-        return;
+      } catch (popupError) {
+        const authCode =
+          typeof popupError === "object" &&
+          popupError !== null &&
+          "code" in popupError &&
+          typeof popupError.code === "string"
+            ? popupError.code
+            : "";
+
+        const shouldFallbackToRedirect =
+          isMobile ||
+          authCode === "auth/popup-blocked" ||
+          authCode === "auth/cancelled-popup-request" ||
+          authCode === "auth/popup-closed-by-user" ||
+          authCode === "auth/operation-not-supported-in-this-environment";
+
+        if (!shouldFallbackToRedirect) {
+          throw popupError;
+        }
       }
+
       await signInWithRedirect(auth, provider);
     } catch (error) {
       const message =
