@@ -19,6 +19,7 @@ import {
   getRedirectResult,
   onAuthStateChanged,
   setPersistence,
+  signInWithPopup,
   signInWithRedirect,
   signOut,
 } from "firebase/auth";
@@ -961,6 +962,16 @@ export default function Home() {
         window.sessionStorage.setItem(AUTH_ATTEMPT_KEY, "1");
       }
       await setPersistence(auth, browserLocalPersistence);
+      if (!isMobile) {
+        const result = await signInWithPopup(auth, provider);
+        if (result.user) {
+          if (typeof window !== "undefined") {
+            window.sessionStorage.removeItem(AUTH_ATTEMPT_KEY);
+          }
+          setAuthError("");
+        }
+        return;
+      }
       await signInWithRedirect(auth, provider);
     } catch (error) {
       const message =
